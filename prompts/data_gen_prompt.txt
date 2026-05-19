@@ -1,0 +1,4 @@
+Generate one to four ads randomly for the following query on the same topic. Each ad should be on the same topic. Each ad should be adjacent with the description of this ad with at most 40 words. The ads should be different from each other. Stop after already generating four ads. Do not continue to generate after a \n character.
+
+Original: {original}
+Ads:
