@@ -1,0 +1,7 @@
+numpy>=2.0
+google-genai>=2.4
+python-dotenv>=1.0
+rouge-score>=0.1.2
+matplotlib>=3.7
+tqdm>=4.65
+pytest>=7.0

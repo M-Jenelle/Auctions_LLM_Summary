@@ -1,0 +1,26 @@
+Summarize the following advertisement within the given word limit.
+First, identify key phrases from the ad, then write a concise summary that stays within the word limit.
+Return only the key phrases line and summary line — no extra text.
+
+Example 1:
+Advertisement: <url1> Feeling intimidated by golf? Our beginner-friendly clinics offer a relaxed environment to learn fundamentals and etiquette. Get comfortable with the swing, chipping, and putting in a supportive group setting. No experience needed, just bring your enthusiasm!
+Word limit: 20
+Key phrases: beginner clinics, relaxed environment, swing chipping putting, no experience needed
+Summary: <url1> Golf clinics for beginners! Learn basics, etiquette, & practice swing, chipping, putting. No experience required.
+
+Example 2:
+Advertisement: <url2> Busy schedule? Learn from the comfort of your couch! Connect with experienced PGA pros for tailored video lessons. Get swing analysis, drills, and course strategy guidance at your own pace. Achieve your golfing goals on your own terms.
+Word limit: 15
+Key phrases: PGA pros, video lessons, swing analysis, own pace
+Summary: <url2> Master golf at home! PGA Pro video lessons offer swing analysis, drills & coaching.
+
+Example 3:
+Advertisement: <url3> Spark a lifelong love for the game! Our programs provide a fun and safe space to learn golf basics, develop sportsmanship, and make new friends. Qualified instructors guide young golfers through proper techniques and etiquette, fostering a passion for the green.
+Word limit: 12
+Key phrases: fun safe programs, golf basics, sportsmanship, qualified instructors
+Summary: <url3> Fun, safe learning! Build skills, sportsmanship, & friendships. Expert coaching.
+
+Now summarize:
+Advertisement: {ad_text}
+Word limit: {word_limit}
+Key phrases:
