@@ -59,8 +59,13 @@ def _key_to_str(key: tuple) -> str:
 
 
 def _str_to_key(s: str) -> tuple:
-    parts = s.split("|")
-    return (parts[0], float(parts[1]), int(parts[2]))
+    if "|" in s:
+        parts = s.split("|")
+        return (parts[0], float(parts[1]), int(parts[2]))
+    # Legacy format: "('GPA+LLM', 0.5, 30)"
+    import ast
+    t = ast.literal_eval(s)
+    return (t[0], float(t[1]), int(t[2]))
 
 
 def save_results(results: dict, path: str) -> None:
@@ -206,25 +211,37 @@ def plot_figure2(
 
 if __name__ == "__main__":
     # Usage:
-    #   python src/experiment.py              → full run
-    #   python src/experiment.py 100          → first 100 queries
-    #   python src/experiment.py 0 100        → queries 0–99  (batch 1)
-    #   python src/experiment.py 100 200      → queries 100–199 (batch 2)
+    #   python src/experiment.py              → auto-resume from last checkpoint
+    #   python src/experiment.py 100          → run first 100 queries (from 0)
+    #   python src/experiment.py 0 100        → run queries 0–99 explicitly
+    #   python src/experiment.py 100 200      → run queries 100–199 explicitly
+
+    dataset  = load_dataset(config.DATA_PATH)
+    cache    = load_cache(config.CACHE_PATH)
+    existing = load_results(config.RESULTS_PATH)
+
+    already_done = len(next(iter(existing.values()), [])) if existing else 0
+
     if len(sys.argv) == 3:
-        start_idx, end_idx = int(sys.argv[1]), int(sys.argv[2])
+        start_idx = int(sys.argv[1])
+        end_idx   = int(sys.argv[2])
     elif len(sys.argv) == 2:
-        start_idx, end_idx = 0, int(sys.argv[1])
+        start_idx = 0
+        end_idx   = int(sys.argv[1])
     else:
-        start_idx, end_idx = 0, None
+        # Auto-resume: pick up exactly where the last run stopped
+        start_idx = already_done
+        end_idx   = config.N_QUERIES
 
-    dataset = load_dataset(config.DATA_PATH)
-    cache   = load_cache(config.CACHE_PATH)
-    batch   = dataset[start_idx:end_idx]
+    if start_idx >= config.N_QUERIES:
+        print(f"All {len(dataset)} queries already processed. Nothing to do.")
+        plot_figure2(existing, config.BETA_LIST, config.N_WORDS_LIST, config.FIGURES_DIR)
+        sys.exit(0)
 
-    print(f"Dataset: {len(dataset)} queries  |  running: [{start_idx}, {end_idx or len(dataset)})")
+    print(f"Dataset cap: {config.N_QUERIES}  |  already done: {already_done}  |  running: [{start_idx}, {end_idx})")
 
     new_results = run_experiment(
-        dataset=batch,
+        dataset=dataset[start_idx:end_idx],
         n_words_list=config.N_WORDS_LIST,
         beta_list=config.BETA_LIST,
         k=config.K,
@@ -234,9 +251,9 @@ if __name__ == "__main__":
 
     save_cache(cache, config.CACHE_PATH)
 
-    existing = load_results(config.RESULTS_PATH)
-    merged   = merge_results(existing, new_results)
+    merged = merge_results(existing, new_results)
     save_results(merged, config.RESULTS_PATH)
 
     plot_figure2(merged, config.BETA_LIST, config.N_WORDS_LIST, config.FIGURES_DIR)
-    print(f"Done. Total queries in results: {len(next(iter(merged.values()), []))}")
+    total = len(next(iter(merged.values()), []))
+    print(f"Done. Total queries in results: {total} / {len(dataset)}")

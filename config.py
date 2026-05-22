@@ -1,7 +1,7 @@
 # Experiment configuration matching Section 5 of the paper
 
 MODEL_NAME = "gemini-2.5-flash"
-N_QUERIES = 1000
+N_QUERIES = 500
 K = 4                            # max ads to show per query
 POSITION_DECAY = 0.9             # r_t = POSITION_DECAY^(t-1)
 SEED = 42
