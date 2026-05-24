@@ -101,18 +101,20 @@ def run_experiment(
     beta_list: list[float],
     k: int,
     model_name: str,
-    max_queries: int | None = None,
     cache: dict | None = None,
+    existing_results: dict | None = None,
+    checkpoint_every: int = 10,
 ) -> dict:
     """
     For each query, run GPA+LLM, Greedy, and POS-FL across all (β, n_words).
 
     Returns dict: (mechanism, beta, n_words) -> list[float] of per-query welfare.
+    Checkpoints both cache and results every `checkpoint_every` queries.
     """
-    if max_queries is not None:
-        dataset = dataset[:max_queries]
     if cache is None:
         cache = {}
+    if existing_results is None:
+        existing_results = {}
 
     pos_disc = default_position_discounts(k)
     results: dict = defaultdict(list)
@@ -153,9 +155,10 @@ def run_experiment(
                 w = compute_welfare(bids, base_ctrs, gpa_summaries, ads, gpa_res.pos_norms, beta)
                 results[("GPA+LLM", beta, n_words)].append(w)
 
-        # Save cache every 50 queries so progress survives a crash.
-        if cache is not None and (q_idx + 1) % 50 == 0:
+        # Checkpoint every N queries so crashes lose minimal work.
+        if (q_idx + 1) % checkpoint_every == 0:
             save_cache(cache, config.CACHE_PATH)
+            save_results(merge_results(existing_results, dict(results)), config.RESULTS_PATH)
 
     return dict(results)
 
@@ -247,6 +250,7 @@ if __name__ == "__main__":
         k=config.K,
         model_name=config.MODEL_NAME,
         cache=cache,
+        existing_results=existing,
     )
 
     save_cache(cache, config.CACHE_PATH)
