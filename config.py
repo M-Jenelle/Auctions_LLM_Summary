@@ -1,6 +1,8 @@
 # Experiment configuration matching Section 5 of the paper
 
-MODEL_NAME = "gemini-2.5-flash"
+# Set to a Gemini model name OR a HuggingFace model ID (e.g. "mistralai/Mistral-7B-Instruct-v0.3")
+MODEL_NAME = "claude-haiku-4-5-20251001"
+
 N_QUERIES = 500
 K = 4                            # max ads to show per query
 POSITION_DECAY = 0.9             # r_t = POSITION_DECAY^(t-1)
@@ -18,7 +20,11 @@ MYERSON_STEPS = 200
 # Paths — all absolute so scripts work regardless of working directory
 from pathlib import Path
 _ROOT = Path(__file__).parent
+
+def _slug(model: str) -> str:
+    return model.replace("/", "_").replace(".", "-")
+
 DATA_PATH    = str(_ROOT / "results" / "dataset.json")
-RESULTS_PATH = str(_ROOT / "results" / "welfare_results.json")
+RESULTS_PATH = str(_ROOT / "results" / f"welfare_results_{_slug(MODEL_NAME)}.json")
 FIGURES_DIR  = str(_ROOT / "results" / "figures")
-CACHE_PATH   = str(_ROOT / "results" / "summary_cache.json")
+CACHE_PATH   = str(_ROOT / "results" / f"summary_cache_{_slug(MODEL_NAME)}.json")
