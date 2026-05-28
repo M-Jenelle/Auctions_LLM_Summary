@@ -1,7 +1,7 @@
 # Experiment configuration matching Section 5 of the paper
 
 # Set to a Gemini model name OR a HuggingFace model ID (e.g. "mistralai/Mistral-7B-Instruct-v0.3")
-MODEL_NAME = "claude-haiku-4-5-20251001"
+MODEL_NAME = "gpt-4o-mini"
 
 N_QUERIES = 500
 K = 4                            # max ads to show per query

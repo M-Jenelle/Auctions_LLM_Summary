@@ -65,6 +65,16 @@ def _get_anthropic_client():
         _anthropic_client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     return _anthropic_client
 
+# ── OpenAI client (lazy-initialised) ─────────────────────────────────────────
+_openai_client = None
+
+def _get_openai_client():
+    global _openai_client
+    if _openai_client is None:
+        from openai import OpenAI
+        _openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    return _openai_client
+
 
 def _get_prompt_template() -> str:
     global _PROMPT_TEMPLATE
@@ -78,6 +88,9 @@ def _is_gemini(model_name: str) -> bool:
 
 def _is_claude(model_name: str) -> bool:
     return model_name.startswith("claude")
+
+def _is_gpt(model_name: str) -> bool:
+    return model_name.startswith("gpt") or model_name.startswith("o1") or model_name.startswith("o3")
 
 def _is_hf(model_name: str) -> bool:
     return "/" in model_name  # HF model IDs always contain a slash
@@ -178,11 +191,33 @@ def _call_claude(prompt: str, model_name: str, retries: int = 6) -> str:
     return ""
 
 
+def _call_gpt(prompt: str, model_name: str, retries: int = 6) -> str:
+    client = _get_openai_client()
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(
+                model=model_name,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=200,
+                temperature=0.4,
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            if attempt < retries - 1:
+                wait = min(60, 5 * (2 ** attempt))
+                time.sleep(wait)
+            else:
+                raise e
+    return ""
+
+
 def _call_llm(prompt: str, model_name: str) -> str:
     if _is_gemini(model_name):
         return _call_gemini(prompt, model_name)
     if _is_claude(model_name):
         return _call_claude(prompt, model_name)
+    if _is_gpt(model_name):
+        return _call_gpt(prompt, model_name)
     if _is_hf(model_name):
         return _call_hf(prompt, model_name)
     return _call_mistral(prompt, model_name)

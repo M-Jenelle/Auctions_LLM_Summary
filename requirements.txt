@@ -3,6 +3,7 @@ google-genai>=2.4
 huggingface_hub>=0.23
 mistralai>=1.0
 anthropic>=0.25
+openai>=1.0
 python-dotenv>=1.0
 rouge-score>=0.1.2
 matplotlib>=3.7
